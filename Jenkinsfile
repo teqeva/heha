@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Clone') {
             steps {
-               git url: "https://github.com/kadimasum/heha", branch: "main"
+               git url: "https://github.com/teqeva/heha", branch: "main"
             }
         }
 
@@ -49,4 +49,27 @@ pipeline {
         }
     }
 
+        stage('Security Scan - Trivy') {
+            steps {
+                sh 'trivy fs . --severity HIGH,CRITICAL --exit-code 0'
+            }
+        }
+    }
+
+    post {
+        success {
+            emailext(
+                subject: "SUCCESS: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
+                body: "Build successful! View details: ${env.BUILD_URL}",
+                to: 'team@example.com'
+            )
+        }
+        failure {
+            emailext(
+                subject: "FAILED: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
+                body: "Build failed! Check logs: ${env.BUILD_URL}console",
+                to: 'team@example.com'
+            )
+        }
+    }
 }
